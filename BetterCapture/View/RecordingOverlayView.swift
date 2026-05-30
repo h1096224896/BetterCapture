@@ -14,6 +14,7 @@ struct RecordingOverlayView: View {
     let onDismiss: () -> Void
 
     @State private var currentPreview: NSImage?
+    private var language: AppLanguage { viewModel.settings.appLanguage }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -53,7 +54,7 @@ struct RecordingOverlayView: View {
                 VStack {
                     HStack {
                         Spacer()
-                        Text("LIVE")
+                        Text(AppText.value("LIVE", "实时", language: language))
                             .font(.system(size: 9, weight: .bold))
                             .foregroundStyle(.white)
                             .padding(.horizontal, 6)
@@ -73,14 +74,14 @@ struct RecordingOverlayView: View {
 
     private var buttonRow: some View {
         VStack(spacing: 6) {
-            Button("Start Recording", systemImage: "record.circle") {
+            Button(AppText.value("Start Recording", "开始录制", language: language), systemImage: "record.circle") {
                 Task {
                     await viewModel.startRecording()
                 }
             }
             .buttonStyle(OverlayButtonStyle(labelColor: .green, weight: .semibold))
 
-            Button("Dismiss") {
+            Button(AppText.value("Dismiss", "关闭", language: language)) {
                 onDismiss()
             }
             .buttonStyle(OverlayButtonStyle(labelColor: .secondary, weight: .medium))

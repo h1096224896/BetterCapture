@@ -152,9 +152,13 @@ enum FrameRate: Int, CaseIterable, Identifiable {
     var id: Int { rawValue }
 
     var displayName: String {
+        displayName(language: .english)
+    }
+
+    func displayName(language: AppLanguage) -> String {
         switch self {
         case .native:
-            return "Native"
+            return AppText.value("Native", "原生", language: language)
         default:
             return "\(rawValue) fps"
         }
@@ -186,6 +190,21 @@ enum VideoQuality: String, CaseIterable, Identifiable {
     case high = "High"
 
     var id: String { rawValue }
+
+    var displayName: String {
+        displayName(language: .english)
+    }
+
+    func displayName(language: AppLanguage) -> String {
+        switch self {
+        case .low:
+            return AppText.value("Low", "低", language: language)
+        case .medium:
+            return AppText.value("Medium", "中", language: language)
+        case .high:
+            return AppText.value("High", "高", language: language)
+        }
+    }
 
     /// Bits-per-pixel multiplier for H.264
     var h264BitsPerPixel: Double {
@@ -247,6 +266,21 @@ final class SettingsStore {
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
+    }
+
+    // MARK: - General Settings
+
+    var appLanguage: AppLanguage {
+        get {
+            access(keyPath: \.appLanguage)
+            let rawValue = defaults.string(forKey: "appLanguage") ?? AppLanguage.english.rawValue
+            return AppLanguage(rawValue: rawValue) ?? .english
+        }
+        set {
+            withMutation(keyPath: \.appLanguage) {
+                defaults.set(newValue.rawValue, forKey: "appLanguage")
+            }
+        }
     }
 
     // MARK: - Video Settings

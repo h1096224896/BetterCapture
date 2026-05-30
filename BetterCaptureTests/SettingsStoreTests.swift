@@ -79,6 +79,17 @@ struct SettingsStoreTests {
         #expect(store.showBetterCapture == false)
     }
 
+    @Test func defaultAppLanguageIsEnglish() {
+        let store = makeStore()
+        #expect(store.appLanguage == .english)
+    }
+
+    @Test func appLanguagePersists() {
+        let store = makeStore()
+        store.appLanguage = .simplifiedChinese
+        #expect(store.appLanguage == .simplifiedChinese)
+    }
+
     // MARK: - Codec/Container Compatibility
 
     @Test func settingProResToMP4SwitchesContainerToMOV() {

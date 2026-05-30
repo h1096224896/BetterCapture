@@ -55,7 +55,7 @@ final class NotificationService: NSObject {
         // Action to show recording in Finder
         let showInFinderAction = UNNotificationAction(
             identifier: NotificationIdentifier.actionShowInFinder,
-            title: "Show in Finder",
+            title: AppText.value("Show in Finder", "在访达中显示", language: .current),
             options: [.foreground]
         )
 
@@ -100,9 +100,15 @@ final class NotificationService: NSObject {
     /// Sends a notification for a successfully saved recording
     /// - Parameter fileURL: The URL of the saved recording file
     func sendRecordingSavedNotification(fileURL: URL) {
+        registerNotificationCategories()
+        let language = settings.appLanguage
         let content = UNMutableNotificationContent()
-        content.title = "Recording Saved"
-        content.body = "Your recording has been saved to \(fileURL.lastPathComponent)"
+        content.title = AppText.value("Recording Saved", "录制已保存", language: language)
+        content.body = AppText.value(
+            "Your recording has been saved to \(fileURL.lastPathComponent)",
+            "录制文件已保存到 \(fileURL.lastPathComponent)",
+            language: language
+        )
         content.sound = .default
         content.categoryIdentifier = NotificationIdentifier.categoryRecordingSaved
 
@@ -129,9 +135,15 @@ final class NotificationService: NSObject {
     /// Sends a notification for a failed recording
     /// - Parameter error: The error that caused the recording to fail
     func sendRecordingFailedNotification(error: Error) {
+        registerNotificationCategories()
+        let language = settings.appLanguage
         let content = UNMutableNotificationContent()
-        content.title = "Recording Failed"
-        content.body = "Your recording could not be saved: \(error.localizedDescription)"
+        content.title = AppText.value("Recording Failed", "录制失败", language: language)
+        content.body = AppText.value(
+            "Your recording could not be saved: \(error.localizedDescription)",
+            "无法保存录制文件：\(error.localizedDescription)",
+            language: language
+        )
         content.sound = .default
         content.categoryIdentifier = NotificationIdentifier.categoryRecordingFailed
 
@@ -154,13 +166,19 @@ final class NotificationService: NSObject {
     /// Sends a notification when recording stopped unexpectedly
     /// - Parameter error: Optional error that caused the stop
     func sendRecordingStoppedNotification(error: Error?) {
+        registerNotificationCategories()
+        let language = settings.appLanguage
         let content = UNMutableNotificationContent()
-        content.title = "Recording Stopped"
+        content.title = AppText.value("Recording Stopped", "录制已停止", language: language)
 
         if let error {
-            content.body = "Recording stopped unexpectedly: \(error.localizedDescription)"
+            content.body = AppText.value(
+                "Recording stopped unexpectedly: \(error.localizedDescription)",
+                "录制意外停止：\(error.localizedDescription)",
+                language: language
+            )
         } else {
-            content.body = "Recording stopped unexpectedly"
+            content.body = AppText.value("Recording stopped unexpectedly", "录制意外停止", language: language)
         }
 
         content.sound = .default

@@ -14,6 +14,7 @@ struct FrameRateTests {
 
     @Test func displayNameNative() {
         #expect(FrameRate.native.displayName == "Native")
+        #expect(FrameRate.native.displayName(language: .simplifiedChinese) == "原生")
     }
 
     @Test func displayNameExplicitRates() {

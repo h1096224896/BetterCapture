@@ -376,15 +376,27 @@ enum CaptureError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .noContentFilterSelected:
-            return "No content has been selected for capture. Please use the picker to select a window or display."
+            return AppText.value(
+                "No content has been selected for capture. Please use the picker to select a window or display.",
+                "尚未选择录制内容。请使用选择器选择窗口或显示器。",
+                language: .current
+            )
         case .failedToCreateStream:
-            return "Failed to create the capture stream."
+            return AppText.value("Failed to create the capture stream.", "创建录制流失败。", language: .current)
         case .captureAlreadyRunning:
-            return "A capture session is already in progress."
+            return AppText.value("A capture session is already in progress.", "录制会话已在进行中。", language: .current)
         case .screenRecordingPermissionDenied:
-            return "Screen recording permission is required. Please grant permission in System Settings → Privacy & Security → Screen Recording."
+            return AppText.value(
+                "Screen recording permission is required. Please grant permission in System Settings > Privacy & Security > Screen Recording.",
+                "需要屏幕录制权限。请在“系统设置”>“隐私与安全性”>“屏幕录制”中授予权限。",
+                language: .current
+            )
         case .microphonePermissionDenied:
-            return "Microphone permission is required. Please grant permission in System Settings → Privacy & Security → Microphone."
+            return AppText.value(
+                "Microphone permission is required. Please grant permission in System Settings > Privacy & Security > Microphone.",
+                "需要麦克风权限。请在“系统设置”>“隐私与安全性”>“麦克风”中授予权限。",
+                language: .current
+            )
         }
     }
 }

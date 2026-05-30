@@ -11,6 +11,7 @@ import SwiftUI
 struct PreviewThumbnailView: View {
     let previewImage: NSImage?
     let isLivePreviewActive: Bool
+    var language: AppLanguage = .english
     let onStartLivePreview: () -> Void
     let onStopLivePreview: () -> Void
 
@@ -76,7 +77,7 @@ struct PreviewThumbnailView: View {
                 VStack {
                     HStack {
                         Spacer()
-                        Text("LIVE")
+                        Text(AppText.value("LIVE", "实时", language: language))
                             .font(.system(size: 9, weight: .bold))
                             .foregroundStyle(.white)
                             .padding(.horizontal, 6)

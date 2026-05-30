@@ -22,9 +22,15 @@ enum ContentSelectionMode: String {
     case selectArea
 
     var label: String {
+        label(language: .english)
+    }
+
+    func label(language: AppLanguage) -> String {
         switch self {
-        case .pickContent: "Pick Content"
-        case .selectArea: "Select Area"
+        case .pickContent:
+            AppText.value("Pick Content", "选择内容", language: language)
+        case .selectArea:
+            AppText.value("Select Area", "选择区域", language: language)
         }
     }
 

@@ -576,17 +576,29 @@ enum AssetWriterError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .failedToCreateWriter:
-            return "Failed to create the asset writer."
+            return AppText.value("Failed to create the asset writer.", "创建媒体写入器失败。", language: .current)
         case .writerNotReady:
-            return "The asset writer is not ready for writing."
+            return AppText.value("The asset writer is not ready for writing.", "媒体写入器尚未准备好写入。", language: .current)
         case .failedToStartWriting(let error):
-            return "Failed to start writing: \(error?.localizedDescription ?? "Unknown error")"
+            return AppText.value(
+                "Failed to start writing: \(error?.localizedDescription ?? "Unknown error")",
+                "开始写入失败：\(error?.localizedDescription ?? "未知错误")",
+                language: .current
+            )
         case .writingFailed(let error):
-            return "Writing failed: \(error?.localizedDescription ?? "Unknown error")"
+            return AppText.value(
+                "Writing failed: \(error?.localizedDescription ?? "Unknown error")",
+                "写入失败：\(error?.localizedDescription ?? "未知错误")",
+                language: .current
+            )
         case .noOutputURL:
-            return "No output URL was configured."
+            return AppText.value("No output URL was configured.", "未配置输出位置。", language: .current)
         case .noFramesWritten:
-            return "No video frames were captured. Check screen recording permissions."
+            return AppText.value(
+                "No video frames were captured. Check screen recording permissions.",
+                "没有捕捉到视频帧。请检查屏幕录制权限。",
+                language: .current
+            )
         }
     }
 }

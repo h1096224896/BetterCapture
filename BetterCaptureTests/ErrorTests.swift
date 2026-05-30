@@ -60,11 +60,19 @@ struct ErrorTests {
 
     @Test func captureErrorScreenRecordingMentionsPermission() {
         let error = CaptureError.screenRecordingPermissionDenied
-        #expect(error.errorDescription?.localizedStandardContains("permission") == true)
+        let description = error.errorDescription
+        #expect(
+            description?.localizedStandardContains("permission") == true ||
+            description?.localizedStandardContains("权限") == true
+        )
     }
 
     @Test func captureErrorMicrophoneMentionsPermission() {
         let error = CaptureError.microphonePermissionDenied
-        #expect(error.errorDescription?.localizedStandardContains("permission") == true)
+        let description = error.errorDescription
+        #expect(
+            description?.localizedStandardContains("permission") == true ||
+            description?.localizedStandardContains("权限") == true
+        )
     }
 }

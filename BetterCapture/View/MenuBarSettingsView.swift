@@ -291,6 +291,7 @@ struct DeviceRow: View {
 struct MicrophoneExpandablePicker: View {
     @Binding var selectedID: String?
     let devices: [AudioInputDevice]
+    let language: AppLanguage
     @State private var isExpanded = false
     @State private var isHovered = false
 
@@ -303,7 +304,7 @@ struct MicrophoneExpandablePicker: View {
                 }
             } label: {
                 HStack {
-                    Text("Microphone")
+                    Text(AppText.value("Microphone", "麦克风", language: language))
                         .font(.system(size: 13, weight: .medium))
                         .foregroundStyle(.primary)
                     Spacer()
@@ -334,7 +335,7 @@ struct MicrophoneExpandablePicker: View {
                 VStack(spacing: 0) {
                     // System Default option
                     DeviceRow(
-                        name: "System Default",
+                        name: AppText.value("System Default", "系统默认", language: language),
                         icon: "mic",
                         isSelected: selectedID == nil
                     ) {
@@ -368,7 +369,7 @@ struct MicrophoneExpandablePicker: View {
         if let id = selectedID, let device = devices.first(where: { $0.id == id }) {
             return device.name
         }
-        return "System Default"
+        return AppText.value("System Default", "系统默认", language: language)
     }
 }
 
@@ -430,31 +431,38 @@ struct MenuBarExpandableSection<Content: View>: View {
 /// Video settings section with header and inline content
 struct VideoSettingsSection: View {
     @Bindable var settings: SettingsStore
+    private var language: AppLanguage { settings.appLanguage }
 
     var body: some View {
         VStack(spacing: 0) {
-            SectionHeader(title: "Video")
+            SectionHeader(title: AppText.value("Video", "视频", language: language))
 
             // Content Filter Section
-            MenuBarExpandableSection(title: "Content Filter") {
-                MenuBarToggle(name: "Show Cursor", isOn: $settings.showCursor)
-                MenuBarToggle(name: "Show Wallpaper", isOn: $settings.showWallpaper)
-                MenuBarToggle(name: "Show Menu Bar", isOn: $settings.showMenuBar)
-                MenuBarToggle(name: "Show Dock", isOn: $settings.showDock)
-                MenuBarToggle(name: "Show Window Shadows", isOn: $settings.showWindowShadows)
-                MenuBarToggle(name: "Show BetterCapture", isOn: $settings.showBetterCapture)
+            MenuBarExpandableSection(title: AppText.value("Content Filter", "内容过滤", language: language)) {
+                MenuBarToggle(name: AppText.value("Show Cursor", "显示光标", language: language), isOn: $settings.showCursor)
+                MenuBarToggle(name: AppText.value("Show Wallpaper", "显示壁纸", language: language), isOn: $settings.showWallpaper)
+                MenuBarToggle(name: AppText.value("Show Menu Bar", "显示菜单栏", language: language), isOn: $settings.showMenuBar)
+                MenuBarToggle(name: AppText.value("Show Dock", "显示 Dock", language: language), isOn: $settings.showDock)
+                MenuBarToggle(
+                    name: AppText.value("Show Window Shadows", "显示窗口阴影", language: language),
+                    isOn: $settings.showWindowShadows
+                )
+                MenuBarToggle(
+                    name: AppText.value("Show BetterCapture", "显示 BetterCapture", language: language),
+                    isOn: $settings.showBetterCapture
+                )
             }
 
             // Frame Rate Picker
             MenuBarExpandablePicker(
-                name: "Frame Rate",
+                name: AppText.value("Frame Rate", "帧率", language: language),
                 selection: $settings.frameRate,
-                options: FrameRate.allCases.map { ($0, $0.displayName) }
+                options: FrameRate.allCases.map { ($0, $0.displayName(language: language)) }
             )
 
             // Video Codec Picker (shows all codecs, disables incompatible ones)
             MenuBarExpandablePicker(
-                name: "Codec",
+                name: AppText.value("Codec", "编码器", language: language),
                 selection: $settings.videoCodec,
                 optionsWithState: VideoCodec.allCases.map { codec in
                     let isSupported = settings.containerFormat.supportedVideoCodecs.contains(codec)
@@ -462,28 +470,34 @@ struct VideoSettingsSection: View {
                         value: codec,
                         label: codec.rawValue,
                         isDisabled: !isSupported,
-                        disabledMessage: isSupported ? nil : "Not supported for \(settings.containerFormat.rawValue.uppercased())"
+                        disabledMessage: isSupported
+                            ? nil
+                            : AppText.value(
+                                "Not supported for \(settings.containerFormat.rawValue.uppercased())",
+                                "\(settings.containerFormat.rawValue.uppercased()) 不支持",
+                                language: language
+                            )
                     )
                 }
             )
 
             // Container Format Picker
             MenuBarExpandablePicker(
-                name: "Container",
+                name: AppText.value("Container", "封装格式", language: language),
                 selection: $settings.containerFormat,
                 options: ContainerFormat.allCases.map { ($0, $0.rawValue.uppercased()) }
             )
 
             // Alpha Channel Toggle (disabled if codec doesn't support or container doesn't support)
             MenuBarToggle(
-                name: "Capture Alpha Channel",
+                name: AppText.value("Capture Alpha Channel", "录制 Alpha 通道", language: language),
                 isOn: $settings.captureAlphaChannel,
                 isDisabled: !settings.videoCodec.canToggleAlpha || !settings.containerFormat.supportsAlphaChannel
             )
 
             // HDR Recording Toggle (disabled for codecs that don't support HDR)
             MenuBarToggle(
-                name: "HDR Recording",
+                name: AppText.value("HDR Recording", "HDR 录制", language: language),
                 isOn: $settings.captureHDR,
                 isDisabled: !settings.videoCodec.supportsHDR
             )
@@ -497,31 +511,33 @@ struct VideoSettingsSection: View {
 struct AudioSettingsSection: View {
     @Bindable var settings: SettingsStore
     let audioDeviceService: AudioDeviceService
+    private var language: AppLanguage { settings.appLanguage }
 
     var body: some View {
         VStack(spacing: 0) {
             // Separator before Audio section
             SectionDivider()
 
-            SectionHeader(title: "Audio")
+            SectionHeader(title: AppText.value("Audio", "音频", language: language))
 
             // System Audio Toggle
-            MenuBarToggle(name: "Capture System Audio", isOn: $settings.captureSystemAudio)
+            MenuBarToggle(name: AppText.value("Capture System Audio", "录制系统音频", language: language), isOn: $settings.captureSystemAudio)
 
             // Microphone Toggle
-            MenuBarToggle(name: "Capture Microphone", isOn: $settings.captureMicrophone)
+            MenuBarToggle(name: AppText.value("Capture Microphone", "录制麦克风", language: language), isOn: $settings.captureMicrophone)
 
             // Microphone Source Picker (only shown when microphone is enabled)
             if settings.captureMicrophone {
                 MicrophoneExpandablePicker(
                     selectedID: $settings.selectedMicrophoneID,
-                    devices: audioDeviceService.availableDevices
+                    devices: audioDeviceService.availableDevices,
+                    language: language
                 )
             }
 
             // Audio Codec Picker (shows all codecs, disables incompatible ones)
             MenuBarExpandablePicker(
-                name: "Audio Codec",
+                name: AppText.value("Audio Codec", "音频编码器", language: language),
                 selection: $settings.audioCodec,
                 optionsWithState: AudioCodec.allCases.map { codec in
                     let isSupported = settings.containerFormat.supportedAudioCodecs.contains(codec)
@@ -529,7 +545,13 @@ struct AudioSettingsSection: View {
                         value: codec,
                         label: codec.rawValue,
                         isDisabled: !isSupported,
-                        disabledMessage: isSupported ? nil : "Not supported for \(settings.containerFormat.rawValue.uppercased())"
+                        disabledMessage: isSupported
+                            ? nil
+                            : AppText.value(
+                                "Not supported for \(settings.containerFormat.rawValue.uppercased())",
+                                "\(settings.containerFormat.rawValue.uppercased()) 不支持",
+                                language: language
+                            )
                     )
                 }
             )
@@ -543,6 +565,7 @@ struct AudioSettingsSection: View {
 struct CameraExpandablePicker: View {
     @Binding var selectedID: String?
     let devices: [CameraDevice]
+    let language: AppLanguage
     @State private var isExpanded = false
     @State private var isHovered = false
 
@@ -555,7 +578,7 @@ struct CameraExpandablePicker: View {
                 }
             } label: {
                 HStack {
-                    Text("Camera")
+                    Text(AppText.value("Camera", "摄像头", language: language))
                         .font(.system(size: 13, weight: .medium))
                         .foregroundStyle(.primary)
                     Spacer()
@@ -586,7 +609,7 @@ struct CameraExpandablePicker: View {
                 VStack(spacing: 0) {
                     // System Default option
                     DeviceRow(
-                        name: "System Default",
+                        name: AppText.value("System Default", "系统默认", language: language),
                         icon: "camera",
                         isSelected: selectedID == nil
                     ) {
@@ -620,7 +643,7 @@ struct CameraExpandablePicker: View {
         if let id = selectedID, let device = devices.first(where: { $0.id == id }) {
             return device.name
         }
-        return "System Default"
+        return AppText.value("System Default", "系统默认", language: language)
     }
 }
 
@@ -630,19 +653,21 @@ struct CameraExpandablePicker: View {
 struct PresenterOverlaySettingsSection: View {
     @Bindable var settings: SettingsStore
     let cameraDeviceService: CameraDeviceService
+    private var language: AppLanguage { settings.appLanguage }
 
     var body: some View {
         VStack(spacing: 0) {
             SectionDivider()
 
-            SectionHeader(title: "Camera")
+            SectionHeader(title: AppText.value("Camera", "摄像头", language: language))
 
-            MenuBarToggle(name: "Presenter Overlay", isOn: $settings.presenterOverlayEnabled)
+            MenuBarToggle(name: AppText.value("Presenter Overlay", "演示者叠加层", language: language), isOn: $settings.presenterOverlayEnabled)
 
             if settings.presenterOverlayEnabled {
                 CameraExpandablePicker(
                     selectedID: $settings.selectedCameraID,
-                    devices: cameraDeviceService.availableDevices
+                    devices: cameraDeviceService.availableDevices,
+                    language: language
                 )
             }
         }

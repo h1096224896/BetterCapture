@@ -16,6 +16,7 @@ struct MenuBarView: View {
     @State private var currentPreview: NSImage?
 
     private var isRecording: Bool { viewModel.isRecording }
+    private var language: AppLanguage { viewModel.settings.appLanguage }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -25,7 +26,8 @@ struct MenuBarView: View {
                 (viewModel.settings.captureMicrophone && viewModel.permissionService.microphoneState != .granted) {
                 PermissionStatusBanner(
                     permissionService: viewModel.permissionService,
-                    showMicrophonePermission: viewModel.settings.captureMicrophone
+                    showMicrophonePermission: viewModel.settings.captureMicrophone,
+                    language: language
                 )
                 MenuBarDivider()
             }
@@ -33,7 +35,8 @@ struct MenuBarView: View {
             // Recording button (stop + timer) or Start button
             if isRecording {
                 RecordingButton(
-                    duration: viewModel.formattedDuration
+                    duration: viewModel.formattedDuration,
+                    language: language
                 ) {
                     Task {
                         await viewModel.stopRecording()
@@ -42,7 +45,7 @@ struct MenuBarView: View {
                 .padding(.top, 8)
             } else {
                 MenuBarActionButton(
-                    title: "Start Recording",
+                    title: AppText.value("Start Recording", "开始录制", language: language),
                     systemImage: "record.circle",
                     accentColor: .green,
                     isDisabled: !viewModel.canStartRecording
@@ -58,7 +61,7 @@ struct MenuBarView: View {
             MenuBarDivider()
 
             // Content Selection
-            ContentSelectionButton(viewModel: viewModel) { dismiss() }
+            ContentSelectionButton(viewModel: viewModel, language: language) { dismiss() }
                 .disabled(isRecording)
 
             // Preview thumbnail
@@ -66,6 +69,7 @@ struct MenuBarView: View {
                 PreviewThumbnailView(
                     previewImage: currentPreview,
                     isLivePreviewActive: viewModel.previewService.isCapturing,
+                    language: language,
                     onStartLivePreview: {
                         Task {
                             await viewModel.startPreview()
@@ -89,7 +93,7 @@ struct MenuBarView: View {
                         await viewModel.resetAreaSelection()
                     }
                 } label: {
-                    Text("Reset Selection")
+                    Text(AppText.value("Reset Selection", "重置选择", language: language))
                         .font(.system(size: 13, weight: .medium))
                         .foregroundStyle(.red)
                         .frame(maxWidth: .infinity)
@@ -122,7 +126,10 @@ struct MenuBarView: View {
             MenuBarDivider()
 
             // Bottom Actions
-            MenuBarActionButton(title: "Open Output Folder", systemImage: "folder") {
+            MenuBarActionButton(
+                title: AppText.value("Open Output Folder", "打开输出文件夹", language: language),
+                systemImage: "folder"
+            ) {
                 let settings = viewModel.settings
                 let didStart = settings.startAccessingOutputDirectory()
                 defer {
@@ -133,12 +140,12 @@ struct MenuBarView: View {
                 NSWorkspace.shared.selectFile(nil, inFileViewerRootedAtPath: settings.outputDirectory.path)
             }
 
-            MenuBarActionButton(title: "Settings...", systemImage: "gear") {
+            MenuBarActionButton(title: AppText.value("Settings...", "设置...", language: language), systemImage: "gear") {
                 NSApplication.shared.activate(ignoringOtherApps: true)
                 openSettings()
             }
 
-            MenuBarActionButton(title: "Quit...", systemImage: "power") {
+            MenuBarActionButton(title: AppText.value("Quit...", "退出...", language: language), systemImage: "power") {
                 NSApplication.shared.terminate(nil)
             }
             .padding(.bottom, 8)
@@ -200,6 +207,7 @@ struct MenuBarActionButton: View {
 /// A combined button that shows recording status and allows stopping
 struct RecordingButton: View {
     let duration: String
+    var language: AppLanguage = .english
     let action: () -> Void
     @State private var isHovered = false
 
@@ -217,7 +225,7 @@ struct RecordingButton: View {
                         .foregroundStyle(.red.opacity(0.8))
                 }
 
-                Text("Stop Recording")
+                Text(AppText.value("Stop Recording", "停止录制", language: language))
                     .font(.system(size: 13, weight: .semibold))
 
                 Spacer()
@@ -249,6 +257,7 @@ struct RecordingButton: View {
 /// Styled consistently with other menu bar rows.
 struct ContentSelectionButton: View {
     let viewModel: RecorderViewModel
+    let language: AppLanguage
     var onDismissPanel: (() -> Void)?
     @AppStorage(ContentSelectionMode.storageKey) private var mode: ContentSelectionMode = .pickContent
     @State private var isDropdownExpanded = false
@@ -266,7 +275,15 @@ struct ContentSelectionButton: View {
     }
 
     private var buttonLabel: String {
-        hasActiveSelection ? "Change \(mode.label.split(separator: " ").last, default: "Content")..." : "\(mode.label)..."
+        if hasActiveSelection {
+            return AppText.value(
+                "Change \(mode.label(language: language))...",
+                "更改\(mode.label(language: language))...",
+                language: language
+            )
+        }
+
+        return "\(mode.label(language: language))..."
     }
 
     var body: some View {
@@ -332,7 +349,7 @@ struct ContentSelectionButton: View {
             if isDropdownExpanded {
                 VStack(spacing: 0) {
                     DeviceRow(
-                        name: ContentSelectionMode.pickContent.label,
+                        name: ContentSelectionMode.pickContent.label(language: language),
                         icon: ContentSelectionMode.pickContent.icon,
                         isSelected: mode == .pickContent
                     ) {
@@ -343,7 +360,7 @@ struct ContentSelectionButton: View {
                     }
 
                     DeviceRow(
-                        name: ContentSelectionMode.selectArea.label,
+                        name: ContentSelectionMode.selectArea.label(language: language),
                         icon: ContentSelectionMode.selectArea.icon,
                         isSelected: mode == .selectArea
                     ) {
@@ -378,13 +395,14 @@ struct ContentSelectionButton: View {
 struct PermissionStatusBanner: View {
     let permissionService: PermissionService
     let showMicrophonePermission: Bool
+    let language: AppLanguage
 
     var body: some View {
         VStack(spacing: 4) {
             HStack(spacing: 8) {
                 Image(systemName: "exclamationmark.triangle.fill")
                     .foregroundStyle(.orange)
-                Text("Permissions Required")
+                Text(AppText.value("Permissions Required", "需要权限", language: language))
                     .font(.system(size: 13, weight: .semibold))
                 Spacer()
             }
@@ -393,8 +411,9 @@ struct PermissionStatusBanner: View {
 
             if permissionService.screenRecordingState != .granted {
                 PermissionRow(
-                    title: "Screen Recording",
-                    isGranted: false
+                    title: AppText.value("Screen Recording", "屏幕录制", language: language),
+                    isGranted: false,
+                    language: language
                 ) {
                     permissionService.openScreenRecordingSettings()
                 }
@@ -402,8 +421,9 @@ struct PermissionStatusBanner: View {
 
             if showMicrophonePermission && permissionService.microphoneState != .granted {
                 PermissionRow(
-                    title: "Microphone",
-                    isGranted: false
+                    title: AppText.value("Microphone", "麦克风", language: language),
+                    isGranted: false,
+                    language: language
                 ) {
                     permissionService.openMicrophoneSettings()
                 }
@@ -417,6 +437,7 @@ struct PermissionStatusBanner: View {
 struct PermissionRow: View {
     let title: String
     let isGranted: Bool
+    let language: AppLanguage
     let action: () -> Void
     @State private var isHovered = false
 
@@ -434,7 +455,7 @@ struct PermissionRow: View {
                 Spacer()
 
                 if !isGranted {
-                    Text("Open Settings")
+                    Text(AppText.value("Open Settings", "打开设置", language: language))
                         .font(.system(size: 11))
                         .foregroundStyle(.secondary)
                 }
